@@ -10,6 +10,6 @@ type Report struct {
 	Desc 		string		`json:"desc" bson:"Desc"`			//description of report
 	Severity 	int			`json:"severity" bson:"Severity"`	//severity of report
 	Solutions 	[]string	`json:"solutions" bson:"Solutions"`	//array of IDs of solutions
-	Comments	[]string	`json:"comments" bson;"Comments"`	//Array of comments under report
+	Comments	[]string	`json:"comments" bson:"Comments"`	//Array of comments under report
 	Anonymous	bool		`json:"anonymous" bson:"Anonymous"`	//Dictates if solutions can be done anonymously or not
 }
