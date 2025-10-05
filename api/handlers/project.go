@@ -41,7 +41,7 @@ func (project Project) ProjectByObjectIDHandler(w http.ResponseWriter, r *http.R
 		models.DataResponse{
 			Status:  http.StatusOK,
 			Message: "success",
-			Data:    map[string]interface{}{"result": dbResp},
+			Data:    map[string]any{"result": dbResp},
 		},
 	)
 
@@ -95,7 +95,7 @@ func (project Project) NewProjectHandler(w http.ResponseWriter, r *http.Request)
 		models.DataResponse{
 			Status:  http.StatusCreated,
 			Message: "success",
-			Data:    map[string]interface{}{"result": result},
+			Data:    map[string]any{"result": result},
 		},
 	)
 

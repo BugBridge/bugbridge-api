@@ -9,9 +9,9 @@ type HealthCheckResponse struct {
 
 // DataResponse is a general response structure with a status, message and optional json data
 type DataResponse struct {
-	Status  int                    `json:"status"`
-	Message string                 `json:"message"`
-	Data    map[string]interface{} `json:"data"`
+	Status  int            `json:"status"`
+	Message string         `json:"message"`
+	Data    map[string]any `json:"data"`
 }
 
 // ErrorMessageResponse returns the error message response struct

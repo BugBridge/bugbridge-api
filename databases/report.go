@@ -9,10 +9,10 @@ import (
 const reportDBO = "reports"
 
 type ReportDatabase interface {
-	FindOne(ctx context.Context, filter interface{}) (*models.Report, error)
-	Find(ctx context.Context, filter interface{}) ([]models.Report, error)
-	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
+	FindOne(ctx context.Context, filter any) (*models.Report, error)
+	Find(ctx context.Context, filter any) ([]models.Report, error)
+	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
 	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
@@ -26,7 +26,7 @@ func NewReportDatabase(db DatabaseHelper) ReportDatabase {
 	}
 }
 
-func (u *reportDatabase) FindOne(ctx context.Context, filter interface{}) (*models.Report, error) {
+func (u *reportDatabase) FindOne(ctx context.Context, filter any) (*models.Report, error) {
 	report := &models.Report{}
 	err := u.db.Collection(reportDBO).FindOne(ctx, filter).Decode(&report)
 	if err != nil {
@@ -35,7 +35,7 @@ func (u *reportDatabase) FindOne(ctx context.Context, filter interface{}) (*mode
 	return report, nil
 }
 
-func (u *reportDatabase) Find(ctx context.Context, filter interface{}) ([]models.Report, error) {
+func (u *reportDatabase) Find(ctx context.Context, filter any) ([]models.Report, error) {
 	var reports []models.Report
 	err := u.db.Collection(reportDBO).Find(ctx, filter).Decode(&reports)
 	if err != nil {
@@ -44,7 +44,7 @@ func (u *reportDatabase) Find(ctx context.Context, filter interface{}) ([]models
 	return reports, nil
 }
 
-func (u *reportDatabase) InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error) {
+func (u *reportDatabase) InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error) {
 	result, err := u.db.Collection(reportDBO).InsertOne(ctx, document)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (u *reportDatabase) InsertOne(ctx context.Context, document interface{}) (*
 	return &result, nil
 }
 
-func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateResult, error) {
+func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update any) (*mongoUpdateResult, error) {
 	result, err := u.db.Collection(reportDBO).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err

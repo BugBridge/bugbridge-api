@@ -41,7 +41,7 @@ func (comment Comment) CommentByObjectIDHandler(w http.ResponseWriter, r *http.R
 		models.DataResponse{
 			Status:  http.StatusOK,
 			Message: "success",
-			Data:    map[string]interface{}{"result": dbResp},
+			Data:    map[string]any{"result": dbResp},
 		},
 	)
 

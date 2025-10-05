@@ -9,10 +9,10 @@ import (
 const projectDBO = "projects"
 
 type ProjectDatabase interface {
-	FindOne(ctx context.Context, filter interface{}) (*models.Project, error)
-	Find(ctx context.Context, filter interface{}) ([]models.Project, error)
-	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
+	FindOne(ctx context.Context, filter any) (*models.Project, error)
+	Find(ctx context.Context, filter any) ([]models.Project, error)
+	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
 	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
@@ -26,7 +26,7 @@ func NewProjectDatabase(db DatabaseHelper) ProjectDatabase {
 	}
 }
 
-func (u *projectDatabase) FindOne(ctx context.Context, filter interface{}) (*models.Project, error) {
+func (u *projectDatabase) FindOne(ctx context.Context, filter any) (*models.Project, error) {
 	project := &models.Project{}
 	err := u.db.Collection(projectDBO).FindOne(ctx, filter).Decode(&project)
 	if err != nil {
@@ -35,7 +35,7 @@ func (u *projectDatabase) FindOne(ctx context.Context, filter interface{}) (*mod
 	return project, nil
 }
 
-func (u *projectDatabase) Find(ctx context.Context, filter interface{}) ([]models.Project, error) {
+func (u *projectDatabase) Find(ctx context.Context, filter any) ([]models.Project, error) {
 	var projects []models.Project
 	err := u.db.Collection(projectDBO).Find(ctx, filter).Decode(&projects)
 	if err != nil {
@@ -44,7 +44,7 @@ func (u *projectDatabase) Find(ctx context.Context, filter interface{}) ([]model
 	return projects, nil
 }
 
-func (u *projectDatabase) InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error) {
+func (u *projectDatabase) InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error) {
 	result, err := u.db.Collection(projectDBO).InsertOne(ctx, document)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (u *projectDatabase) InsertOne(ctx context.Context, document interface{}) (
 	return &result, nil
 }
 
-func (u *projectDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateResult, error) {
+func (u *projectDatabase) UpdateOne(ctx context.Context, filter, update any) (*mongoUpdateResult, error) {
 	result, err := u.db.Collection(projectDBO).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err

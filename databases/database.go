@@ -14,19 +14,19 @@ type DatabaseHelper interface {
 }
 
 type CollectionHelper interface {
-	FindOne(context.Context, interface{}) SingleResultHelper
-	Find(context.Context, interface{}) CursorHelper
-	InsertOne(context.Context, interface{}) (mongoInsertOneResult, error)
-	UpdateOne(context.Context, interface{}, interface{}) (mongoUpdateResult, error)
+	FindOne(context.Context, any) SingleResultHelper
+	Find(context.Context, any) CursorHelper
+	InsertOne(context.Context, any) (mongoInsertOneResult, error)
+	UpdateOne(context.Context, any, any) (mongoUpdateResult, error)
 	// DeleteOne(context.Context, interface{}) (mongoDeleteOneResult, error)
 }
 
 type SingleResultHelper interface {
-	Decode(v interface{}) error
+	Decode(v any) error
 }
 
 type CursorHelper interface {
-	Decode(v interface{}) error
+	Decode(v any) error
 }
 
 type ClientHelper interface {
@@ -101,17 +101,17 @@ func (md *mongoDatabase) Client() ClientHelper {
 	return &mongoClient{cl: client}
 }
 
-func (mc *mongoCollection) FindOne(ctx context.Context, filter interface{}) SingleResultHelper {
+func (mc *mongoCollection) FindOne(ctx context.Context, filter any) SingleResultHelper {
 	singleResult := mc.coll.FindOne(ctx, filter)
 	return &mongoSingleResult{sr: singleResult}
 }
 
-func (mc *mongoCollection) Find(ctx context.Context, filter interface{}) CursorHelper {
+func (mc *mongoCollection) Find(ctx context.Context, filter any) CursorHelper {
 	cursor, _ := mc.coll.Find(ctx, filter)
 	return &mongoCursor{cr: cursor}
 }
 
-func (mc *mongoCollection) InsertOne(ctx context.Context, document interface{}) (mongoInsertOneResult, error) {
+func (mc *mongoCollection) InsertOne(ctx context.Context, document any) (mongoInsertOneResult, error) {
 	insertOneResult, err := mc.coll.InsertOne(ctx, document)
 	if err != nil {
 		return mongoInsertOneResult{}, err
@@ -119,7 +119,7 @@ func (mc *mongoCollection) InsertOne(ctx context.Context, document interface{}) 
 	return mongoInsertOneResult{ir: insertOneResult}, nil
 }
 
-func (mc *mongoCollection) UpdateOne(ctx context.Context, filter, update interface{}) (mongoUpdateResult, error) {
+func (mc *mongoCollection) UpdateOne(ctx context.Context, filter, update any) (mongoUpdateResult, error) {
 	updateOneResult, err := mc.coll.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return mongoUpdateResult{}, err
@@ -127,14 +127,14 @@ func (mc *mongoCollection) UpdateOne(ctx context.Context, filter, update interfa
 	return mongoUpdateResult{Ur: updateOneResult}, nil
 }
 
-func (sr *mongoSingleResult) Decode(v interface{}) error {
+func (sr *mongoSingleResult) Decode(v any) error {
 	return sr.sr.Decode(v)
 }
 
-func (cr *mongoCursor) Decode(v interface{}) error {
+func (cr *mongoCursor) Decode(v any) error {
 	return cr.All(context.Background(), v)
 }
 
-func (cr *mongoCursor) All(ctx context.Context, results interface{}) error {
+func (cr *mongoCursor) All(ctx context.Context, results any) error {
 	return cr.cr.All(ctx, results)
 }

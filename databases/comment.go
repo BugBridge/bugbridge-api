@@ -9,10 +9,10 @@ import (
 const commentDBO = "comments"
 
 type CommentDatabase interface {
-	FindOne(ctx context.Context, filter interface{}) (*models.Comment, error)
-	Find(ctx context.Context, filter interface{}) ([]models.Comment, error)
-	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
+	FindOne(ctx context.Context, filter any) (*models.Comment, error)
+	Find(ctx context.Context, filter any) ([]models.Comment, error)
+	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
 	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
@@ -26,7 +26,7 @@ func NewCommentDatabase(db DatabaseHelper) CommentDatabase {
 	}
 }
 
-func (u *commentDatabase) FindOne(ctx context.Context, filter interface{}) (*models.Comment, error) {
+func (u *commentDatabase) FindOne(ctx context.Context, filter any) (*models.Comment, error) {
 	comment := &models.Comment{}
 	err := u.db.Collection(commentDBO).FindOne(ctx, filter).Decode(&comment)
 	if err != nil {
@@ -35,7 +35,7 @@ func (u *commentDatabase) FindOne(ctx context.Context, filter interface{}) (*mod
 	return comment, nil
 }
 
-func (u *commentDatabase) Find(ctx context.Context, filter interface{}) ([]models.Comment, error) {
+func (u *commentDatabase) Find(ctx context.Context, filter any) ([]models.Comment, error) {
 	var comments []models.Comment
 	err := u.db.Collection(commentDBO).Find(ctx, filter).Decode(&comments)
 	if err != nil {
@@ -44,7 +44,7 @@ func (u *commentDatabase) Find(ctx context.Context, filter interface{}) ([]model
 	return comments, nil
 }
 
-func (u *commentDatabase) InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error) {
+func (u *commentDatabase) InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error) {
 	result, err := u.db.Collection(commentDBO).InsertOne(ctx, document)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (u *commentDatabase) InsertOne(ctx context.Context, document interface{}) (
 	return &result, nil
 }
 
-func (u *commentDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateResult, error) {
+func (u *commentDatabase) UpdateOne(ctx context.Context, filter, update any) (*mongoUpdateResult, error) {
 	result, err := u.db.Collection(commentDBO).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
