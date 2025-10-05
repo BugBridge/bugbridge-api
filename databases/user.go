@@ -13,7 +13,7 @@ type UserDatabase interface {
 	Find(ctx context.Context, filter interface{}) ([]models.User, error)
 	InsertOne(ctx context.Context, filter interface{}) (*mongoInsertOneResult, error)
 	UpdateOne(ctx context.Context, filter interface{}) (*mongoUpdateOneResult, error)
-	DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error)
 }
 
 type userDatabase struct {

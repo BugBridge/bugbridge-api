@@ -13,7 +13,7 @@ type ReportDatabase interface {
 	Find(ctx context.Context, filter interface{}) ([]models.Report, error)
 	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
 	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
-	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error)
 }
 
 type reportDatabase struct {
