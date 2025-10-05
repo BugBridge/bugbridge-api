@@ -16,7 +16,7 @@ import (
 )
 
 type Report struct {
-	DB databases.UserDatabase
+	DB databases.ReportDatabase
 }
 
 // TODO: add delete and update functionality

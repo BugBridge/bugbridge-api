@@ -5,14 +5,14 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/BugBridge/bugbridge-api/api"
-	"github.com/BugBridge/bugbridge-api/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	"github.com/BugBridge/bugbridge-api/api"
 	"github.com/BugBridge/bugbridge-api/config"
 	"github.com/BugBridge/bugbridge-api/databases"
+	"github.com/BugBridge/bugbridge-api/models"
 )
 
 var validate = validator.New()

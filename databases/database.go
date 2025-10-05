@@ -3,10 +3,9 @@ package databases
 import (
 	"context"
 
+	"github.com/BugBridge/bugbridge-api/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/BugBridge/bugbridge-api"
 )
 
 type DatabaseHelper interface {
@@ -18,8 +17,8 @@ type CollectionHelper interface {
 	FindOne(context.Context, interface{}) SingleResultHelper
 	Find(context.Context, interface{}) CursorHelper
 	InsertOne(context.Context, interface{}) (mongoInsertOneResult, error)
-	UpdateOne(context.Context, interface{}, interface{}) (mongoUpdateOneResult, error)
-	DeleteOne(context.Context, interface{}) (mongoDeleteOneResult, error)
+	UpdateOne(context.Context, interface{}, interface{}) (mongoUpdateResult, error)
+	// DeleteOne(context.Context, interface{}) (mongoDeleteOneResult, error)
 }
 
 type SingleResultHelper interface {

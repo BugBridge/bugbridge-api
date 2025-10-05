@@ -3,7 +3,7 @@ package databases
 import (
 	"context"
 
-	"github.com/BugBridge/bugbridge-api"
+	"github.com/BugBridge/bugbridge-api/models"
 )
 
 const reportDBO = "reports"
@@ -11,9 +11,9 @@ const reportDBO = "reports"
 type ReportDatabase interface {
 	FindOne(ctx context.Context, filter interface{}) (*models.Report, error)
 	Find(ctx context.Context, filter interface{}) ([]models.Report, error)
-	InsertOne(ctx context.Context, filter interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter interface{}) (*mongoUpdateOneResult, error)
-	DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
+	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
 type reportDatabase struct {
@@ -52,7 +52,7 @@ func (u *reportDatabase) InsertOne(ctx context.Context, document interface{}) (*
 	return &result, nil
 }
 
-func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateOneResult, error) {
+func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateResult, error) {
 	result, err := u.db.Collection(reportDBO).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
@@ -60,10 +60,10 @@ func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update interface
 	return &result, nil
 }
 
-func (u *reportDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-	result, err := u.db.Collection(reportDBO).DeleteOne(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
+// func (u *reportDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
+// 	result, err := u.db.Collection(reportDBO).DeleteOne(ctx, filter)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &result, nil
+// }

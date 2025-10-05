@@ -16,7 +16,7 @@ import (
 )
 
 type Comment struct {
-	DB databases.UserDatabase
+	DB databases.CommentDatabase
 }
 
 // TODO: add delete and update functionality

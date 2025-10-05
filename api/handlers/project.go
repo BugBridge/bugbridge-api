@@ -16,7 +16,7 @@ import (
 )
 
 type Project struct {
-	DB databases.UserDatabase
+	DB databases.ProjectDatabase
 }
 
 // TODO: add delete and update functionality

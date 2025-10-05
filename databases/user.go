@@ -3,7 +3,7 @@ package databases
 import (
 	"context"
 
-	"github.com/BugBridge/bugbridge-api"
+	"github.com/BugBridge/bugbridge-api/models"
 )
 
 const userDBO = "users"
@@ -11,9 +11,9 @@ const userDBO = "users"
 type UserDatabase interface {
 	FindOne(ctx context.Context, filter interface{}) (*models.User, error)
 	Find(ctx context.Context, filter interface{}) ([]models.User, error)
-	InsertOne(ctx context.Context, filter interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter interface{}) (*mongoUpdateOneResult, error)
-	DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
+	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
 type userDatabase struct {
@@ -52,7 +52,7 @@ func (u *userDatabase) InsertOne(ctx context.Context, document interface{}) (*mo
 	return &result, nil
 }
 
-func (u *userDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateOneResult, error) {
+func (u *userDatabase) UpdateOne(ctx context.Context, filter, update interface{}) (*mongoUpdateResult, error) {
 	result, err := u.db.Collection(userDBO).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
@@ -60,10 +60,10 @@ func (u *userDatabase) UpdateOne(ctx context.Context, filter, update interface{}
 	return &result, nil
 }
 
-func (u *userDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-	result, err := u.db.Collection(userDBO).DeleteOne(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
-}
+// func (u *userDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
+// 	result, err := u.db.Collection(userDBO).DeleteOne(ctx, filter)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &result, nil
+// }
