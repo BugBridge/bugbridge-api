@@ -112,7 +112,7 @@ func (comment Comment) NewCommentHandler(w http.ResponseWriter, r *http.Request)
 	// TODO: add validation comment attributes
 
 	newComment := models.Comment{
-		ID:       primitive.NewObjectID().Hex(),
+		ID:       primitive.NewObjectID(),
 		AuthorID: details.AuthorID,
 		ReportID: details.ReportID,
 		Content:  details.Content,

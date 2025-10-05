@@ -75,7 +75,7 @@ func (project Project) NewProjectHandler(w http.ResponseWriter, r *http.Request)
 	// TODO: add validation to title / description length
 
 	newProject := models.Project{
-		ID:         primitive.NewObjectID().Hex(),
+		ID:         primitive.NewObjectID(),
 		Name:       details.Name,
 		Desc:       details.Desc,
 		Template:   details.Template,

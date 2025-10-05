@@ -75,7 +75,7 @@ func (user User) NewUserHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: validate inputs, ensure username is available, email, password
 
 	newUser := models.User{
-		ID:         primitive.NewObjectID().Hex(),
+		ID:         primitive.NewObjectID(),
 		ProjectIDs: []string{},
 		ReportIDs:  []string{},
 		Username:   details.Username,

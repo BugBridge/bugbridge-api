@@ -75,7 +75,7 @@ func (report Report) NewReportHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: add validation to title / description length
 
 	newReport := models.Report{
-		ID:         primitive.NewObjectID().Hex(),
+		ID:         primitive.NewObjectID(),
 		AuthorID:   details.AuthorID,
 		Title:      details.Title,
 		Desc:       details.Desc,
