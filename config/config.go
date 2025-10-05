@@ -40,6 +40,7 @@ func New() *Config {
 		DatabaseName: os.Getenv("DB_NAME"),
 		BaseURL:      os.Getenv("BASE_URL"),
 		Port:         os.Getenv("PORT"),
+		Secret: 	  os.Getenv("SECRET"),
 	}
 }
 
