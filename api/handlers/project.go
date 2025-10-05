@@ -105,3 +105,26 @@ func (project Project) NewProjectHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
+
+func (project Project) DeleteProjectByIdHandler(w http.ResponseWriter, r *http.Request) {
+	projectID := mux.Vars(r)["project_id"]
+
+	uID, err := primitive.ObjectIDFromHex(projectID)
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := project.DB.DeleteOne(context.Background(), bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete project", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("Project not found", http.StatusNotFound, w, nil)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

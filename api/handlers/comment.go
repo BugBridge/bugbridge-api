@@ -134,3 +134,26 @@ func (comment Comment) NewCommentHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
+
+func (comment Comment) DeleteCommentByIdHandler(w http.ResponseWriter, r *http.Request) {
+	commentID := mux.Vars(r)["comment_id"]
+
+	uID, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := comment.DB.DeleteOne(context.Background(), bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete comment", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("Comment not found", http.StatusNotFound, w, nil)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

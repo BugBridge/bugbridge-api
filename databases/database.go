@@ -64,7 +64,7 @@ type mongoUpdateResult struct {
 }
 
 type mongoDeleteOneResult struct {
-	dr *mongo.DeleteResult
+	Dr *mongo.DeleteResult
 }
 
 type mongoSession struct {
@@ -136,7 +136,7 @@ func (mc *mongoCollection) DeleteOne(ctx context.Context, filter any) (mongoDele
 	if err != nil {
 		return mongoDeleteOneResult{}, err
 	}
-	return mongoDeleteOneResult{dr: deleteOneResult}, nil
+	return mongoDeleteOneResult{Dr: deleteOneResult}, nil
 }
 
 func (sr *mongoSingleResult) Decode(v any) error {

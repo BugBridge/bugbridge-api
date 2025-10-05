@@ -44,16 +44,20 @@ func (a *App) New() *mux.Router {
 	// API endpoints
 	apiCreate.Handle("/user/{user_id}", api.Middleware(http.HandlerFunc(users.UserByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/user/create", api.Middleware(http.HandlerFunc(users.NewUserHandler))).Methods("POST")
+	apiCreate.Handle("/user/delete/{user_id}", api.Middleware(http.HandlerFunc(users.DeleteUserByIdHandler))).Methods("GET")
 
 	apiCreate.Handle("/report/{report_id}", api.Middleware(http.HandlerFunc(reports.ReportByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/report/create", api.Middleware(http.HandlerFunc(reports.NewReportHandler))).Methods("POST")
+	apiCreate.Handle("/report/delete/{report_id}", api.Middleware(http.HandlerFunc(reports.DeleteReportByIdHandler))).Methods("GET")
 
 	apiCreate.Handle("/project/{project_id}", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/project/create", api.Middleware(http.HandlerFunc(projects.NewProjectHandler))).Methods("POST")
+	apiCreate.Handle("/project/delete/{project_id}", api.Middleware(http.HandlerFunc(projects.DeleteProjectByIdHandler))).Methods("GET")
 
 	apiCreate.Handle("/comment/{comment_id}", api.Middleware(http.HandlerFunc(comments.CommentByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/comment/report/{report_id}", api.Middleware(http.HandlerFunc(comments.CommentsByReportIDHandler))).Methods("GET")
 	apiCreate.Handle("/comment/create", api.Middleware(http.HandlerFunc(comments.NewCommentHandler))).Methods("POST")
+	apiCreate.Handle("/comment/delete/{comment_id}", api.Middleware(http.HandlerFunc(comments.DeleteCommentByIdHandler))).Methods("GET")
 
 	return r
 }

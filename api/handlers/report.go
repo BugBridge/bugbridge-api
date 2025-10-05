@@ -106,3 +106,26 @@ func (report Report) NewReportHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
+
+func (report Report) DeleteReportByIdHandler(w http.ResponseWriter, r *http.Request) {
+	reportID := mux.Vars(r)["report_id"]
+
+	uID, err := primitive.ObjectIDFromHex(reportID)
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := report.DB.DeleteOne(context.Background(), bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete report", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("report not found", http.StatusNotFound, w, nil)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
