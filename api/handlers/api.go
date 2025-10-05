@@ -30,6 +30,7 @@ type App struct {
 func (a *App) New() *mux.Router {
 
 	r := mux.NewRouter()
+	r.Use(api.MuxCORS)
 
 	// create database handlers like this
 	authService := auth.NewAuthServiceFromEnv()
