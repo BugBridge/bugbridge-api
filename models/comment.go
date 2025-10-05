@@ -11,7 +11,7 @@ type Comment struct {
 
 // Data structure of the json object received in POST to create comment
 type CommentDetails struct {
-	AuthorID string `json:"authorId"` //Id of who wrote the comment
-	ReportID string `json:"reportId"` //Id of the report the comment is under
-	Content  string `json:"content"`  //Content of the comment
+	AuthorID string `json:"authorId" validate:"required"`          //Id of who wrote the comment
+	ReportID string `json:"reportId" validate:"required"`          //Id of the report the comment is under
+	Content  string `json:"content"  validate:"required,max=1000"` //Content of the comment
 }

@@ -13,16 +13,16 @@ type Project struct {
 
 // Data structure of the json object received in POST to create project
 type ProjectDetails struct {
-	Name     string       `json:"name"`
-	Des      string       `json:"des"`
-	OwnerID  string       `json:"adminId"`
-	Template TemplateData `json:"template"`
+	Name     string       `json:"name"      validate:"required,min=3,max=50"`
+	Des      string       `json:"des"       validate:"required,max=500"`
+	OwnerID  string       `json:"ownerId"   validate:"required"`
+	Template TemplateData `json:"template"  validate:"required"`
 }
 
 type TemplateData struct {
-	Title          string `json:"title"     bson:"title"`
-	Des            string `json:"des"       bson:"des"`
-	Steps          string `json:"steps"     bson:"steps"`
-	Behaviour      string `json:"behaviour" bson:"behaviour"`
-	AdditionalInfo string `json:"addInfo"   bson:"additionalInfo"`
+	Title          string `json:"title"     bson:"title"     validate:"required,min=3,max=50"`
+	Des            string `json:"des"       bson:"des"       validate:"required,max=500"`
+	Steps          string `json:"steps"     bson:"steps"     validate:"required,max=1000"`
+	Behaviour      string `json:"behaviour" bson:"behaviour" validate:"required,max=1000"`
+	AdditionalInfo string `json:"addInfo"   bson:"addInfo"   validate:"max=1000"`
 }

@@ -14,8 +14,8 @@ type Report struct {
 
 // Data structure of the json object received in POST to create report
 type ReportDetails struct {
-	AuthorID  string `json:"authorId"`  // ID of author
-	ProjectID string `json:"projectId"` // Project ID report is submitted to
-	Title     string `json:"title"`     // title of the report
-	Des       string `json:"des"`       // description of report
+	AuthorID  string `json:"authorId"  validate:"required"`          // ID of author
+	ProjectID string `json:"projectId" validate:"required"`          // Project ID report is submitted to
+	Title     string `json:"title"     validate:"required,max=50"`   // title of the report
+	Des       string `json:"des"       validate:"required,max=1000"` // description of report
 }
