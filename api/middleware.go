@@ -100,6 +100,7 @@ func authMiddleware(next http.Handler) http.Handler
 			http.Error(w, "invalid user id claim", http.StatusUnauthorized)
 			return
 		}	
+		//UserIDKey user_id in mongo gets the userID from DB
 		ctx := context.WithValue(r.Context(), userIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})		
