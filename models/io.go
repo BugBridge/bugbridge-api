@@ -24,3 +24,13 @@ type MessageError struct {
 	Message string `json:"message"`
 	Error   string `json:"error"`
 }
+
+type LoginRequest struct {
+	Email    string `json:"email"    validator:"required"`
+	Password string `json:"password" validator:"required"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
+	User  User   `json:"user"`
+}

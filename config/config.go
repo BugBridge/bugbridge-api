@@ -18,6 +18,7 @@ type Config struct {
 	DatabaseName string
 	BaseURL      string
 	Port         string
+	Secret       string
 }
 
 // New sets up all config related services
@@ -40,6 +41,7 @@ func New() *Config {
 		DatabaseName: os.Getenv("DB_NAME"),
 		BaseURL:      os.Getenv("BASE_URL"),
 		Port:         os.Getenv("PORT"),
+		Secret: 	  os.Getenv("SECRET"),
 	}
 }
 

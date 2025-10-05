@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"github.com/BugBridge/bugbridge-api/api/auth"
 	"github.com/BugBridge/bugbridge-api/config"
 	"github.com/BugBridge/bugbridge-api/databases"
 	"github.com/BugBridge/bugbridge-api/models"
@@ -17,10 +18,72 @@ import (
 )
 
 type User struct {
-	DB databases.UserDatabase
+	DB   databases.UserDatabase
+	Auth *auth.AuthService
 }
 
-// TODO: add delete and update functionality
+// temp
+const TokenName = "bugbridge"
+
+func (user User) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// defer and context
+
+	var req models.LoginRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		config.ErrorStatus("Invalid login request", http.StatusBadRequest, w, err)
+		return
+	}
+
+	// Lookup user
+	dbResp, err := user.DB.FindOne(context.Background(), bson.M{"email": req.Email})
+	if err != nil {
+		config.ErrorStatus("failed to get user by email", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp == nil {
+		config.ErrorStatus("user not found", http.StatusNotFound, w, err)
+		return
+	}
+
+	// Check password with bcrypt
+	// if bcrypt.CompareHashAndPassword([]byte(dbResp.Password), []byte(req.Password)) != nil {
+	if dbResp.Password != req.Password {
+		config.ErrorStatus("Incorrect password", http.StatusUnauthorized, w, err)
+		return
+	}
+
+	// Sign JWT with sign func
+	token, err := user.Auth.Sign(dbResp.ID.Hex())
+	if err != nil {
+		config.ErrorStatus("Failed to sign token", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	// return token
+	resp := models.LoginResponse{Token: token}
+	resp.User = *dbResp
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// Logout clears the JWT cookie or
+// instructs client to drop the token.
+func (user User) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     TokenName,
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false, // change to true for https
+	})
+
+	w.WriteHeader(http.StatusNoContent)
+}
 
 // UserByIDHandler returns a user by a given ID
 func (user User) UserByObjectIDHandler(w http.ResponseWriter, r *http.Request) {

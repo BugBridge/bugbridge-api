@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/BugBridge/bugbridge-api/api"
+	"github.com/BugBridge/bugbridge-api/api/auth"
 	"github.com/BugBridge/bugbridge-api/config"
 	"github.com/BugBridge/bugbridge-api/databases"
 	"github.com/BugBridge/bugbridge-api/models"
@@ -31,7 +32,8 @@ func (a *App) New() *mux.Router {
 	r := mux.NewRouter()
 
 	// create database handlers like this
-	users := User{DB: databases.NewUserDatabase(a.dbHelper)}
+	authService := auth.NewAuthServiceFromEnv()
+	users := User{DB: databases.NewUserDatabase(a.dbHelper), Auth: authService}
 	projects := Project{DB: databases.NewProjectDatabase(a.dbHelper)}
 	reports := Report{DB: databases.NewReportDatabase(a.dbHelper)}
 	comments := Comment{DB: databases.NewCommentDatabase(a.dbHelper)}
@@ -42,26 +44,27 @@ func (a *App) New() *mux.Router {
 	apiCreate := r.PathPrefix("/api").Subrouter()
 
 	// API endpoints
-	apiCreate.Handle("/user/{user_id}", api.Middleware(http.HandlerFunc(users.UserByObjectIDHandler))).Methods("GET")
-	apiCreate.Handle("/user/create", api.Middleware(http.HandlerFunc(users.NewUserHandler))).Methods("POST")
-	apiCreate.Handle("/user/update/{user_id}", api.Middleware(http.HandlerFunc(users.UpdateUserHandler))).Methods("PATCH")
-	apiCreate.Handle("/user/delete/{user_id}", api.Middleware(http.HandlerFunc(users.DeleteUserByIdHandler))).Methods("GET")
+	apiCreate.Handle("/user/{user_id}", api.Middleware(a.Config, http.HandlerFunc(users.UserByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/user/create", http.HandlerFunc(users.NewUserHandler)).Methods("POST")
+	apiCreate.Handle("/user/update/{user_id}", api.Middleware(a.Config, http.HandlerFunc(users.UpdateUserHandler))).Methods("PATCH")
+	apiCreate.Handle("/user/delete/{user_id}", api.Middleware(a.Config, http.HandlerFunc(users.DeleteUserByIdHandler))).Methods("DELETE")
+	apiCreate.Handle("/user/login", http.HandlerFunc(users.LoginHandler)).Methods("POST")
 
-	apiCreate.Handle("/report/{report_id}", api.Middleware(http.HandlerFunc(reports.ReportByObjectIDHandler))).Methods("GET")
-	apiCreate.Handle("/report/create", api.Middleware(http.HandlerFunc(reports.NewReportHandler))).Methods("POST")
-	apiCreate.Handle("/report/update/{report_id}", api.Middleware(http.HandlerFunc(reports.UpdateReportHanlder))).Methods("PATCH")
-	apiCreate.Handle("/report/delete/{report_id}", api.Middleware(http.HandlerFunc(reports.DeleteReportByIdHandler))).Methods("GET")
+	apiCreate.Handle("/report/{report_id}", api.Middleware(a.Config, http.HandlerFunc(reports.ReportByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/report/create", api.Middleware(a.Config, http.HandlerFunc(reports.NewReportHandler))).Methods("POST")
+	apiCreate.Handle("/report/update/{report_id}", api.Middleware(a.Config, http.HandlerFunc(reports.UpdateReportHanlder))).Methods("PATCH")
+	apiCreate.Handle("/report/delete/{report_id}", api.Middleware(a.Config, http.HandlerFunc(reports.DeleteReportByIdHandler))).Methods("DELETE")
 
-	apiCreate.Handle("/project/{project_id}", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
-	apiCreate.Handle("/project/create", api.Middleware(http.HandlerFunc(projects.NewProjectHandler))).Methods("POST")
-	apiCreate.Handle("/project/update/{project_id}", api.Middleware(http.HandlerFunc(projects.UpdateProjectHandler))).Methods("PATCH")
-	apiCreate.Handle("/project/delete/{project_id}", api.Middleware(http.HandlerFunc(projects.DeleteProjectByIdHandler))).Methods("GET")
+	apiCreate.Handle("/project/{project_id}", api.Middleware(a.Config, http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/project/create", api.Middleware(a.Config, http.HandlerFunc(projects.NewProjectHandler))).Methods("POST")
+	apiCreate.Handle("/project/update/{project_id}", api.Middleware(a.Config, http.HandlerFunc(projects.UpdateProjectHandler))).Methods("PATCH")
+	apiCreate.Handle("/project/delete/{project_id}", api.Middleware(a.Config, http.HandlerFunc(projects.DeleteProjectByIdHandler))).Methods("DELETE")
 
-	apiCreate.Handle("/comment/{comment_id}", api.Middleware(http.HandlerFunc(comments.CommentByObjectIDHandler))).Methods("GET")
-	apiCreate.Handle("/comment/report/{report_id}", api.Middleware(http.HandlerFunc(comments.CommentsByReportIDHandler))).Methods("GET")
-	apiCreate.Handle("/comment/create", api.Middleware(http.HandlerFunc(comments.NewCommentHandler))).Methods("POST")
-	apiCreate.Handle("/comment/update/{comment_id}", api.Middleware(http.HandlerFunc(comments.UpdateCommentHandler))).Methods("PATCH")
-	apiCreate.Handle("/comment/delete/{comment_id}", api.Middleware(http.HandlerFunc(comments.DeleteCommentByIdHandler))).Methods("GET")
+	apiCreate.Handle("/comment/{comment_id}", api.Middleware(a.Config, http.HandlerFunc(comments.CommentByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/comment/report/{report_id}", api.Middleware(a.Config, http.HandlerFunc(comments.CommentsByReportIDHandler))).Methods("GET")
+	apiCreate.Handle("/comment/create", api.Middleware(a.Config, http.HandlerFunc(comments.NewCommentHandler))).Methods("POST")
+	apiCreate.Handle("/comment/update/{comment_id}", api.Middleware(a.Config, http.HandlerFunc(comments.UpdateCommentHandler))).Methods("PATCH")
+	apiCreate.Handle("/comment/delete/{comment_id}", api.Middleware(a.Config, http.HandlerFunc(comments.DeleteCommentByIdHandler))).Methods("DELETE")
 
 	return r
 }
