@@ -161,3 +161,44 @@ func (user User) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }
+
+func (user User) DeleteUserByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	userID := mux.Vars(r)["user_id"]
+
+	uID, err := primitive.ObjectIDFromHex(userID)
+
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := user.DB.DeleteOne(ctx, bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete user", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("User not found", http.StatusNotFound, w, nil)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}

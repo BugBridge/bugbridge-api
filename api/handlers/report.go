@@ -117,6 +117,7 @@ func (report Report) UpdateReportHanlder(w http.ResponseWriter, r *http.Request)
 	reportID := mux.Vars(r)["report_id"]
 
 	rID, err := primitive.ObjectIDFromHex(reportID)
+
 	if err != nil {
 		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
 		return
@@ -144,6 +145,47 @@ func (report Report) UpdateReportHanlder(w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		config.ErrorStatus("the report could not be updated", http.StatusNotFound, w, err)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
+func (report Report) DeleteReportByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	reportID := mux.Vars(r)["report_id"]
+
+	uID, err := primitive.ObjectIDFromHex(reportID)
+
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := report.DB.DeleteOne(ctx, bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete report", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("report not found", http.StatusNotFound, w, nil)
 		return
 	}
 

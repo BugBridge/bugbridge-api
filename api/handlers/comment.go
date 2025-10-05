@@ -144,6 +144,7 @@ func (comment Comment) UpdateCommentHandler(w http.ResponseWriter, r *http.Reque
 	commentID := mux.Vars(r)["comment_id"]
 
 	cID, err := primitive.ObjectIDFromHex(commentID)
+
 	if err != nil {
 		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
 		return
@@ -169,6 +170,47 @@ func (comment Comment) UpdateCommentHandler(w http.ResponseWriter, r *http.Reque
 
 	if err != nil {
 		config.ErrorStatus("the comment could not be updated", http.StatusNotFound, w, err)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
+func (comment Comment) DeleteCommentByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	commentID := mux.Vars(r)["comment_id"]
+
+	uID, err := primitive.ObjectIDFromHex(commentID)
+
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := comment.DB.DeleteOne(ctx, bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete comment", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("Comment not found", http.StatusNotFound, w, nil)
 		return
 	}
 

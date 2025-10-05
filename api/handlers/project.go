@@ -116,6 +116,7 @@ func (project Project) UpdateProjectHandler(w http.ResponseWriter, r *http.Reque
 	projectID := mux.Vars(r)["project_id"]
 
 	pID, err := primitive.ObjectIDFromHex(projectID)
+
 	if err != nil {
 		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
 		return
@@ -143,6 +144,47 @@ func (project Project) UpdateProjectHandler(w http.ResponseWriter, r *http.Reque
 
 	if err != nil {
 		config.ErrorStatus("the project could not be updated", http.StatusNotFound, w, err)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}
+
+func (project Project) DeleteProjectByIdHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	projectID := mux.Vars(r)["project_id"]
+
+	uID, err := primitive.ObjectIDFromHex(projectID)
+
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	dbResp, err := project.DB.DeleteOne(ctx, bson.M{"_id": uID})
+	if err != nil {
+		config.ErrorStatus("failed to delete project", http.StatusNotFound, w, err)
+		return
+	}
+
+	if dbResp.Dr.DeletedCount == 0 {
+		config.ErrorStatus("Project not found", http.StatusNotFound, w, nil)
 		return
 	}
 
