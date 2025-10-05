@@ -18,7 +18,7 @@ type CollectionHelper interface {
 	Find(context.Context, any) CursorHelper
 	InsertOne(context.Context, any) (mongoInsertOneResult, error)
 	UpdateOne(context.Context, any, any) (mongoUpdateResult, error)
-	// DeleteOne(context.Context, interface{}) (mongoDeleteOneResult, error)
+	DeleteOne(context.Context, any) (mongoDeleteOneResult, error)
 }
 
 type SingleResultHelper interface {
@@ -63,12 +63,16 @@ type mongoUpdateResult struct {
 	Ur *mongo.UpdateResult
 }
 
+type mongoDeleteOneResult struct {
+	dr *mongo.DeleteResult
+}
+
 type mongoSession struct {
 	mongo.Session
 }
 
 func NewClient(conf *config.Config) (ClientHelper, error) {
-	c, err := mongo.NewClient(options.Client().ApplyURI(conf.URL))
+	c, err := mongo.NewClient(options.Client().ApplyURI(conf.URL)) // This is deprecated, lets see if we can find a better option
 
 	return &mongoClient{cl: c}, err
 }
@@ -88,7 +92,7 @@ func (mc *mongoClient) StartSession() (mongo.Session, error) {
 }
 
 func (mc *mongoClient) Connect() error {
-	return mc.cl.Connect(context.TODO()) // use context.TODO() instead of nil cause good practice ¯\_(ツ)_/¯
+	return mc.cl.Connect(context.TODO()) // This is also deprecated, lets see if we can fix
 }
 
 func (md *mongoDatabase) Collection(colName string) CollectionHelper {
@@ -125,6 +129,14 @@ func (mc *mongoCollection) UpdateOne(ctx context.Context, filter, update any) (m
 		return mongoUpdateResult{}, err
 	}
 	return mongoUpdateResult{Ur: updateOneResult}, nil
+}
+
+func (mc *mongoCollection) DeleteOne(ctx context.Context, filter any) (mongoDeleteOneResult, error) {
+	deleteOneResult, err := mc.coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return mongoDeleteOneResult{}, err
+	}
+	return mongoDeleteOneResult{dr: deleteOneResult}, nil
 }
 
 func (sr *mongoSingleResult) Decode(v any) error {

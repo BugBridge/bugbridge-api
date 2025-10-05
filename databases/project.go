@@ -13,7 +13,7 @@ type ProjectDatabase interface {
 	Find(ctx context.Context, filter any) ([]models.Project, error)
 	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
 	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
-	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error)
 }
 
 type projectDatabase struct {
@@ -60,10 +60,10 @@ func (u *projectDatabase) UpdateOne(ctx context.Context, filter, update any) (*m
 	return &result, nil
 }
 
-// func (u *projectDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-// 	result, err := u.db.Collection(projectDBO).DeleteOne(ctx, filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (u *projectDatabase) DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(projectDBO).DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

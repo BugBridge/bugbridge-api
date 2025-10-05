@@ -13,7 +13,7 @@ type ReportDatabase interface {
 	Find(ctx context.Context, filter any) ([]models.Report, error)
 	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
 	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
-	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error)
 }
 
 type reportDatabase struct {
@@ -60,10 +60,10 @@ func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update any) (*mo
 	return &result, nil
 }
 
-// func (u *reportDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-// 	result, err := u.db.Collection(reportDBO).DeleteOne(ctx, filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (u *reportDatabase) DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(reportDBO).DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

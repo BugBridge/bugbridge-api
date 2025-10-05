@@ -11,9 +11,9 @@ const userDBO = "users"
 type UserDatabase interface {
 	FindOne(ctx context.Context, filter any) (*models.User, error)
 	Find(ctx context.Context, filter any) ([]models.User, error)
-	InsertOne(ctx context.Context, document any) (*mongoInsertOneResult, error)
+	InsertOne(ctx context.Context, filter any) (*mongoInsertOneResult, error)
 	UpdateOne(ctx context.Context, filter, document any) (*mongoUpdateResult, error)
-	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error)
 }
 
 type userDatabase struct {
@@ -60,10 +60,10 @@ func (u *userDatabase) UpdateOne(ctx context.Context, filter, update any) (*mong
 	return &result, nil
 }
 
-// func (u *userDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-// 	result, err := u.db.Collection(userDBO).DeleteOne(ctx, filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (u *userDatabase) DeleteOne(ctx context.Context, filter any) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(userDBO).DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

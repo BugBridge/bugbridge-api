@@ -72,7 +72,7 @@ func (comment Comment) CommentsByReportIDHandler(w http.ResponseWriter, r *http.
 		models.DataResponse{
 			Status:  http.StatusOK,
 			Message: "success",
-			Data:    map[string]interface{}{"result": dbResp},
+			Data:    map[string]any{"result": dbResp},
 		},
 	)
 
@@ -122,7 +122,7 @@ func (comment Comment) NewCommentHandler(w http.ResponseWriter, r *http.Request)
 		models.DataResponse{
 			Status:  http.StatusCreated,
 			Message: "success",
-			Data:    map[string]interface{}{"result": result},
+			Data:    map[string]any{"result": result},
 		},
 	)
 
