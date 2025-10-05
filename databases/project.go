@@ -61,8 +61,8 @@ func (u *projectDatabase) UpdateOne(ctx context.Context, filter, update interfac
 	return &result, nil
 }
 
-func (u *projectDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-	result, err := u.db.Collection(projectDBO).DeleteOne(ctx, filter)
+func (u *projectDatabase) DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(projectDBO).DeleteOne(document, condition)
 	if err != nil {
 		return nil, err
 	}

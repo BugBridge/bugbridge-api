@@ -60,8 +60,8 @@ func (u *userDatabase) UpdateOne(ctx context.Context, filter, update interface{}
 	return &result, nil
 }
 
-func (u *userDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-	result, err := u.db.Collection(userDBO).DeleteOne(ctx, filter)
+func (u *userDatabase) DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(userDBO).DeleteOne(document, condition)
 	if err != nil {
 		return nil, err
 	}
