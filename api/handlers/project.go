@@ -75,14 +75,12 @@ func (project Project) NewProjectHandler(w http.ResponseWriter, r *http.Request)
 	// TODO: add validation to title / description length
 
 	newProject := models.Project{
-		ID:         primitive.NewObjectID(),
-		Name:       details.Name,
-		Desc:       details.Desc,
-		Template:   details.Template,
-		OwnerID:    details.OwnerID,
-		AdminsIDs:  []string{},
-		MembersIDs: []string{},
-		ReportIDs:  []string{},
+		ID:        primitive.NewObjectID(),
+		Name:      details.Name,
+		Des:       details.Des,
+		Template:  details.Template,
+		OwnerID:   details.OwnerID,
+		AdminsIDs: []string{},
 	}
 
 	result, err := project.DB.InsertOne(ctx, newProject)

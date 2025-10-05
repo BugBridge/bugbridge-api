@@ -77,7 +77,6 @@ func (user User) NewUserHandler(w http.ResponseWriter, r *http.Request) {
 	newUser := models.User{
 		ID:         primitive.NewObjectID(),
 		ProjectIDs: []string{},
-		ReportIDs:  []string{},
 		Username:   details.Username,
 		Email:      details.Email,
 		Password:   details.Password,

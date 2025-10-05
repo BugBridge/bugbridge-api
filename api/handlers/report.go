@@ -75,13 +75,12 @@ func (report Report) NewReportHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: add validation to title / description length
 
 	newReport := models.Report{
-		ID:         primitive.NewObjectID(),
-		AuthorID:   details.AuthorID,
-		Title:      details.Title,
-		Desc:       details.Desc,
-		Severity:   -1, // -1 indicates it hasn't been assigned a severity level
-		Resolved:   false,
-		CommentIDs: []string{},
+		ID:       primitive.NewObjectID(),
+		AuthorID: details.AuthorID,
+		Title:    details.Title,
+		Des:      details.Des,
+		Severity: -1, // -1 indicates it hasn't been assigned a severity level
+		Resolved: false,
 	}
 
 	result, err := report.DB.InsertOne(ctx, newReport)
