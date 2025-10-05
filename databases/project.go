@@ -11,9 +11,9 @@ const projectDBO = "projects"
 type ProjectDatabase interface {
 	FindOne(ctx context.Context, filter interface{}) (*models.Project, error)
 	Find(ctx context.Context, filter interface{}) ([]models.Project, error)
-	InsertOne(ctx context.Context, document interface{}) (*mongoInsertOneResult, error)
-	UpdateOne(ctx context.Context, filter, document interface{}) (*mongoUpdateResult, error)
-	// DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
+	InsertOne(ctx context.Context, filter interface{}) (*mongoInsertOneResult, error)
+	UpdateOne(ctx context.Context, filter interface{}) (*mongoUpdateOneResult, error)
+	DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error)
 }
 
 type projectDatabase struct {
@@ -60,10 +60,10 @@ func (u *projectDatabase) UpdateOne(ctx context.Context, filter, update interfac
 	return &result, nil
 }
 
-// func (u *projectDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-// 	result, err := u.db.Collection(projectDBO).DeleteOne(ctx, filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (u *projectDatabase) DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(projectDBO).DeleteOne(document, condition)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}

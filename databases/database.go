@@ -17,8 +17,8 @@ type CollectionHelper interface {
 	FindOne(context.Context, interface{}) SingleResultHelper
 	Find(context.Context, interface{}) CursorHelper
 	InsertOne(context.Context, interface{}) (mongoInsertOneResult, error)
-	UpdateOne(context.Context, interface{}, interface{}) (mongoUpdateResult, error)
-	// DeleteOne(context.Context, interface{}) (mongoDeleteOneResult, error)
+	UpdateOne(context.Context, interface{}, interface{}) (mongoUpdateOneResult, error)
+	DeleteOne(any, bool) (mongoDeleteOneResult, error)
 }
 
 type SingleResultHelper interface {
@@ -61,6 +61,10 @@ type mongoInsertOneResult struct {
 
 type mongoUpdateResult struct {
 	Ur *mongo.UpdateResult
+}
+
+type mongoDeleteOneResult struct {
+	dr *mongo.DeleteResult
 }
 
 type mongoSession struct {
@@ -125,6 +129,14 @@ func (mc *mongoCollection) UpdateOne(ctx context.Context, filter, update interfa
 		return mongoUpdateResult{}, err
 	}
 	return mongoUpdateResult{Ur: updateOneResult}, nil
+}
+
+func (mc *mongoCollection) DeleteOne(document any, condition bool) (mongoDeleteOneResult, error) {
+	deleteOneResult, err := mc.coll.DeleteOne(document, condition)
+	if err != nil {
+		return mongoDeleteOneResult{}, err
+	}
+	return mongoDeleteOneResult{dr: deleteOneResult}, nil
 }
 
 func (sr *mongoSingleResult) Decode(v interface{}) error {

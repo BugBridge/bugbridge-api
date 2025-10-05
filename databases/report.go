@@ -60,10 +60,10 @@ func (u *reportDatabase) UpdateOne(ctx context.Context, filter, update interface
 	return &result, nil
 }
 
-// func (u *reportDatabase) DeleteOne(ctx context.Context, filter interface{}) (*mongoDeleteOneResult, error) {
-// 	result, err := u.db.Collection(reportDBO).DeleteOne(ctx, filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (u *reportDatabase) DeleteOne(document any, condition bool) (*mongoDeleteOneResult, error) {
+	result, err := u.db.Collection(reportDBO).DeleteOne(document, conditions)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
