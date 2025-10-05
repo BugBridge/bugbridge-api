@@ -4,7 +4,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Report struct {
 	ID        primitive.ObjectID `json:"_id"        bson:"_id"`       // report id
-	AuthorID  string             `json:"author"     bson:"author"`    // ID of author
+	AuthorID  string             `json:"authorId"     bson:"author"`  // ID of author
 	ProjectID string             `json:"projectId"  bson:"projectId"` // Project ID report is submitted to
 	Title     string             `json:"title"      bson:"title"`     // title of id
 	Des       string             `json:"des"        bson:"des"`       // description of report

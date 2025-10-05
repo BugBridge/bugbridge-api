@@ -58,13 +58,7 @@ func (comment Comment) CommentByObjectIDHandler(w http.ResponseWriter, r *http.R
 func (comment Comment) CommentsByReportIDHandler(w http.ResponseWriter, r *http.Request) {
 	reportID := mux.Vars(r)["report_id"]
 
-	rID, err := primitive.ObjectIDFromHex(reportID)
-	if err != nil {
-		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
-		return
-	}
-
-	dbResp, err := comment.DB.Find(context.Background(), bson.M{"reportId": rID})
+	dbResp, err := comment.DB.Find(context.Background(), bson.M{"reportId": reportID})
 	if err != nil {
 		config.ErrorStatus("failed to get comment by ID", http.StatusNotFound, w, err)
 		return

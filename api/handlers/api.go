@@ -48,8 +48,8 @@ func (a *App) New() *mux.Router {
 	apiCreate.Handle("/report/{report_id}", api.Middleware(http.HandlerFunc(reports.ReportByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/report/create", api.Middleware(http.HandlerFunc(reports.NewReportHandler))).Methods("POST")
 
-	apiCreate.Handle("/projects/{project_id}", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
-	apiCreate.Handle("/projects/create", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("POST")
+	apiCreate.Handle("/project/{project_id}", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/project/create", api.Middleware(http.HandlerFunc(projects.NewProjectHandler))).Methods("POST")
 
 	apiCreate.Handle("/comment/{comment_id}", api.Middleware(http.HandlerFunc(comments.CommentByObjectIDHandler))).Methods("GET")
 	apiCreate.Handle("/comment/report/{report_id}", api.Middleware(http.HandlerFunc(comments.CommentsByReportIDHandler))).Methods("GET")
