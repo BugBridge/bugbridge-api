@@ -16,3 +16,10 @@ type UserDetails struct {
 	Email    string `json:"email"     validate:"required,email"`
 	Password string `json:"password"  validate:"required,min=8,max=64"`
 }
+
+// Data structure of the json object received in POST to create user
+type UserUpdateDetails struct {
+	Username string `json:"username"  validate:"min=5,max=25"`
+	Email    string `json:"email"     validate:"email"`
+	Password string `json:"password"  validate:"min=8,max=64"`
+}

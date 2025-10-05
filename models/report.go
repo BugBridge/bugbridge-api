@@ -19,3 +19,11 @@ type ReportDetails struct {
 	Title     string `json:"title"     validate:"required,max=50"`   // title of the report
 	Des       string `json:"des"       validate:"required,max=1000"` // description of report
 }
+
+// Data structure of the json object received in PATCH to update report
+type ReportUpdateDetails struct {
+	AuthorID  string `json:"authorId"`                      // ID of author
+	ProjectID string `json:"projectId"`                     // Project ID report is submitted to
+	Title     string `json:"title"     validate:"max=50"`   // title of the report
+	Des       string `json:"des"       validate:"max=1000"` // description of report
+}

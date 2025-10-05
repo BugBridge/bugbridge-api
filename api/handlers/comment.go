@@ -134,3 +134,57 @@ func (comment Comment) NewCommentHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
+
+// UpdateCommentHandler updates the content for an existing comment
+func (comment Comment) UpdateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var newDetails models.CommentUpdateDetails
+	defer cancel()
+
+	commentID := mux.Vars(r)["comment_id"]
+
+	cID, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	// validate the request body
+	if err := json.NewDecoder(r.Body).Decode(&newDetails); err != nil {
+		config.ErrorStatus("failed to unpack request body", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	// use the validator library to validate required fields
+	if validationErr := validate.Struct(&newDetails); validationErr != nil {
+		config.ErrorStatus("invalid request body", http.StatusBadRequest, w, validationErr)
+		return
+	}
+
+	dbResp, err := comment.DB.UpdateOne(
+		ctx,
+		bson.M{"_id": cID},
+		bson.M{"$set": bson.M{"content": newDetails.Content}},
+	)
+
+	if err != nil {
+		config.ErrorStatus("the comment could not be updated", http.StatusNotFound, w, err)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
+}

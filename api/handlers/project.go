@@ -13,6 +13,7 @@ import (
 	"github.com/BugBridge/bugbridge-api/config"
 	"github.com/BugBridge/bugbridge-api/databases"
 	"github.com/BugBridge/bugbridge-api/models"
+	"github.com/BugBridge/bugbridge-api/util"
 )
 
 type Project struct {
@@ -103,5 +104,61 @@ func (project Project) NewProjectHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Write(b)
+}
+
+// UpdateProjectHandler updates the attributes of a project
+func (project Project) UpdateProjectHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var newDetails models.ProjectUpdateDetails
+	defer cancel()
+
+	projectID := mux.Vars(r)["project_id"]
+
+	pID, err := primitive.ObjectIDFromHex(projectID)
+	if err != nil {
+		config.ErrorStatus("failed to get objectID from Hex", http.StatusBadRequest, w, err)
+		return
+	}
+
+	// validate the request body
+	if err := json.NewDecoder(r.Body).Decode(&newDetails); err != nil {
+		config.ErrorStatus("failed to unpack request body", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	// use the validator library to validate required fields
+	if validationErr := validate.Struct(&newDetails); validationErr != nil {
+		config.ErrorStatus("invalid request body", http.StatusBadRequest, w, validationErr)
+		return
+	}
+
+	update := util.BuildUpdate(newDetails)
+
+	dbResp, err := project.DB.UpdateOne(
+		ctx,
+		bson.M{"_id": pID},
+		bson.M{"$set": update},
+	)
+
+	if err != nil {
+		config.ErrorStatus("the project could not be updated", http.StatusNotFound, w, err)
+		return
+	}
+
+	b, err := json.Marshal(
+		models.DataResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]any{"result": dbResp},
+		},
+	)
+
+	if err != nil {
+		config.ErrorStatus("failed to marshal response", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 }

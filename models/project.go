@@ -26,3 +26,18 @@ type TemplateData struct {
 	Behaviour      string `json:"behaviour" bson:"behaviour" validate:"required,max=1000"`
 	AdditionalInfo string `json:"addInfo"   bson:"addInfo"   validate:"max=1000"`
 }
+
+// Data structure of the json object received in PATCH to update project
+type ProjectUpdateDetails struct {
+	Name     string             `json:"name"      validate:"max=50"`
+	Des      string             `json:"des"       validate:"max=500"`
+	Template TemplateUpdateData `json:"template"`
+}
+
+type TemplateUpdateData struct {
+	Title          string `json:"title"     validate:"max=50"`
+	Des            string `json:"des"       validate:"max=500"`
+	Steps          string `json:"steps"     validate:"max=1000"`
+	Behaviour      string `json:"behaviour" validate:"max=1000"`
+	AdditionalInfo string `json:"addInfo"   validate:"max=1000"`
+}
