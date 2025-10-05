@@ -49,35 +49,6 @@ func (a *AuthService) Sign(userID string) (string, error) {
 	return signedJwtToken, nil
 }
 
-// Parses the tokens
-func (a *AuthService) Parse(tokenString string) (jwt.MapClaims, error) {
-	claims := jwt.MapClaims{}
-
-	//Parse claims e.g userID, (users Id) returns 2 things
-	_, err := jwt.ParseWithClaims(
-		tokenString,
-		claims,
-		func(t *jwt.Token) (any, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrTokenSignatureInvalid
-			}
-			return a.Secret, nil
-		},
-
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
-		jwt.WithIssuer(a.Issuer),
-		jwt.WithAudience(a.Audience),
-		jwt.WithExpirationRequired(),
-		jwt.WithLeeway(30*time.Second),
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return claims, nil
-}
-
 // Returns the subject (user Id) from jwt token
 func Subject(claims jwt.MapClaims) (string, bool) {
 	//is sub there
