@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/BugBridge/bugbridge-api/api"
 	"github.com/BugBridge/bugbridge-api/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -27,21 +28,32 @@ type App struct {
 // New creates a new mux router and all the routes
 func (a *App) New() *mux.Router {
 
-	// Detect if system is new and needs default admin
-	a.newSystem()
-
 	r := mux.NewRouter()
+
 	// create database handlers like this
-	// cow := Cow{DB: databases.NewCowDatabase(a.dbHelper)}
+	users := User{DB: databases.NewUserDatabase(a.dbHelper)}
+	projects := Project{DB: databases.NewProjectDatabase(a.dbHelper)}
+	reports := Report{DB: databases.NewReportDatabase(a.dbHelper)}
+	comments := Comment{DB: databases.NewCommentDatabase(a.dbHelper)}
 
 	// healthcheck
 	r.HandleFunc("/health", healthCheckHandler)
 
-	apiCreate := r.PathPrefix("/api/v1").Subrouter()
+	apiCreate := r.PathPrefix("/api").Subrouter()
 
-	// API Endpoints defined like this
-	// apiCreate.Handle("/cow/{cow_id}", api.Middleware(http.HandlerFunc(cow.CowByObjectIDHandler))).Methods("GET") // By Object ID not Cow Name
-	// apiCreate.Handle("/cows", api.Middleware(http.HandlerFunc(cow.CowHandler))).Methods("GET")                   // Returns all cows
+	// API endpoints
+	apiCreate.Handle("/user/{user_id}", api.Middleware(http.HandlerFunc(users.UserByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/user/create", api.Middleware(http.HandlerFunc(users.NewUserHandler))).Methods("POST")
+
+	apiCreate.Handle("/report/{report_id}", api.Middleware(http.HandlerFunc(reports.ReportByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/report/create", api.Middleware(http.HandlerFunc(reports.NewReportHandler))).Methods("POST")
+
+	apiCreate.Handle("/projects/{project_id}", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/projects/create", api.Middleware(http.HandlerFunc(projects.ProjectByObjectIDHandler))).Methods("POST")
+
+	apiCreate.Handle("/comment/{comment_id}", api.Middleware(http.HandlerFunc(comments.CommentByObjectIDHandler))).Methods("GET")
+	apiCreate.Handle("/comment/report/{report_id}", api.Middleware(http.HandlerFunc(comments.CommentsByReportIDHandler))).Methods("GET")
+	apiCreate.Handle("/comment/create", api.Middleware(http.HandlerFunc(comments.NewCommentHandler))).Methods("POST")
 
 	return r
 }
