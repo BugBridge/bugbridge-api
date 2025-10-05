@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -27,10 +28,35 @@ type App struct {
 // New creates a new mux router and all the routes
 func (a *App) New() *mux.Router {
 
-	// Detect if system is new and needs default admin
-	a.newSystem()
+	// System initialization (removed newSystem for now)
 
 	r := mux.NewRouter()
+
+	// Add CORS middleware
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+			if req.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			next.ServeHTTP(w, req)
+		})
+	})
+
+	// Add app context middleware
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			ctx := context.WithValue(req.Context(), "app", a)
+			req = req.WithContext(ctx)
+			next.ServeHTTP(w, req)
+		})
+	})
+
 	// create database handlers like this
 	// cow := Cow{DB: databases.NewCowDatabase(a.dbHelper)}
 
@@ -39,29 +65,48 @@ func (a *App) New() *mux.Router {
 
 	apiCreate := r.PathPrefix("/api/v1").Subrouter()
 
-	// API Endpoints defined like this
-	// apiCreate.Handle("/cow/{cow_id}", api.Middleware(http.HandlerFunc(cow.CowByObjectIDHandler))).Methods("GET") // By Object ID not Cow Name
-	// apiCreate.Handle("/cows", api.Middleware(http.HandlerFunc(cow.CowHandler))).Methods("GET")                   // Returns all cows
+	// Authentication endpoints
+	apiCreate.HandleFunc("/auth/login", LoginHandler).Methods("POST", "OPTIONS")
+	apiCreate.HandleFunc("/auth/signup", SignupHandler).Methods("POST", "OPTIONS")
+	apiCreate.Handle("/auth/me", Middleware(http.HandlerFunc(GetCurrentUserHandler))).Methods("GET", "OPTIONS")
+
+	// Company endpoints
+	apiCreate.HandleFunc("/companies", GetCompaniesHandler).Methods("GET", "OPTIONS")
+	apiCreate.Handle("/companies", Middleware(http.HandlerFunc(CreateCompanyHandler))).Methods("POST", "OPTIONS")
+	apiCreate.Handle("/companies/join", Middleware(http.HandlerFunc(JoinCompanyHandler))).Methods("POST", "OPTIONS")
+
+	// Bug Reports endpoints
+	apiCreate.HandleFunc("/bug-reports", GetBugReportsHandler).Methods("GET", "OPTIONS")
+	apiCreate.Handle("/bug-reports", Middleware(http.HandlerFunc(CreateBugReportHandler))).Methods("POST", "OPTIONS")
+	apiCreate.Handle("/bug-reports/{id}", Middleware(http.HandlerFunc(GetBugReportHandler))).Methods("GET", "OPTIONS")
+	apiCreate.Handle("/bug-reports/{id}/status", Middleware(http.HandlerFunc(UpdateBugReportStatusHandler))).Methods("PUT", "OPTIONS")
+	apiCreate.Handle("/bug-reports/{id}/comments", Middleware(http.HandlerFunc(AddCommentHandler))).Methods("POST", "OPTIONS")
+
+	// User-specific endpoints
+	apiCreate.Handle("/users/{userId}/reports", Middleware(http.HandlerFunc(GetUserBugReportsHandler))).Methods("GET", "OPTIONS")
 
 	return r
 }
 
 func (a *App) Initialize() error {
-	client, err := databases.NewClient(&a.Config)
+	// Convert config.Config to databases.Config
+	dbConfig := &databases.Config{
+		URL:          a.Config.URL,
+		DatabaseName: a.Config.DatabaseName,
+		BaseURL:      a.Config.BaseURL,
+		Port:         a.Config.Port,
+	}
+
+	client, err := databases.NewClient(dbConfig)
 	if err != nil {
 		// if we fail to create a new database client, the kill the pod
 		zap.S().With(err).Error("failed to create new client")
 		return err
 	}
 
-	a.dbHelper = databases.NewDatabase(&a.Config, client)
-	err = client.Connect()
-	if err != nil {
-		// if we fail to connect to the database, the kill the pod
-		zap.S().With(err).Error("failed to connect to database")
-		return err
-	}
-	zap.S().Info("DeviceBookingAPI has connected to the database")
+	a.dbHelper = databases.NewDatabase(dbConfig, client)
+	// Client is already connected from NewClient, no need to connect again
+	zap.S().Info("BugBridge API has connected to the database")
 
 	// initialize api router
 	a.initializeRoutes()
@@ -71,6 +116,11 @@ func (a *App) Initialize() error {
 
 func (a *App) initializeRoutes() {
 	a.Router = a.New()
+}
+
+// GetDBHelper returns the database helper
+func (a *App) GetDBHelper() databases.DatabaseHelper {
+	return a.dbHelper
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {

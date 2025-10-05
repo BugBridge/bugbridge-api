@@ -20,6 +20,9 @@ func main() {
 		return
 	}
 
-	zap.S().Infow("DeviceBookingAPI is up and running", "url", a.Config.BaseURL, "port", a.Config.Port)
-	log.Fatal(http.ListenAndServe(":"+a.Config.Port, a.Router))
+	// Add database middleware
+	routerWithDB := handlers.DatabaseMiddleware(a.GetDBHelper())(a.Router)
+
+	zap.S().Infow("BugBridge API is up and running", "url", a.Config.BaseURL, "port", a.Config.Port)
+	log.Fatal(http.ListenAndServe(":"+a.Config.Port, routerWithDB))
 }
