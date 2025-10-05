@@ -22,36 +22,34 @@ func Middleware(next http.Handler) http.Handler {
 
 type ctxKey string
 
+// userIDKey is used as the context key for storing the user ID after authentication.
 const userIDKey ctxKey = "user_id"
 
-//Check JWT tokens and verify them 
-func authMiddleware(next http.Handler) http.Handler
-{
+
+
+//get Token and use secret to parseWithClaims
+func authMiddleware(next http.Handler) http.Handler{
 	secret := os.Getenv("SECRET")
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
-	{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		authHeader := strings.TrimSpace(r.Header.Get("Authorization"))
 
 		//if the header is empty Error
-		if authHeader == ""
-		{
+		if authHeader == ""{
 			http.Error(w, "No authorization Header", http.StatusUnauthorized)
 			return
 		}
 
 		//If there is not 2 parts to header Error
 		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer")
-		{
+		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer"){
 			http.Error(w, "invalid Authorization Header", http.StatusUnauthorized)
 			return
 		}
 
 		//If token is empty Error 
 		tokenString := strings.TrimSpace(parts[1])
-		if tokenString == ""
-		{
+		if tokenString == ""{
 			http.Error(w, "empty token", http.StatusUnauthorized)
 			return
 		}
@@ -59,49 +57,40 @@ func authMiddleware(next http.Handler) http.Handler
 		
 		claims := jwt.MapClaims{}
 
-	 	token, err := jwt.ParseWithClaims(tokenString, claims, jwt.WithKeyfunc(func(t *jwt.Token) (interface{}, error) {
-            if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok 
-			{
-                return nil, fmt.Errorf("unexpected signing method", t.Header["alg"])
-            }
-			//We should make the secret in env later
-            return []byte(secret), nil
-        }), 
-		jwt.WithValidMethods([]string{jwt.SigningMethodS256.Alg()}),
-		)
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+
+			return []byte(secret), nil
+		}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 
 
-		if err != nil || !token.Valid
-		{
+		if err != nil || !token.Valid{
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
 
 		//Check to make sure it is good
 		var uid any
-		if v, ok := claims["user_id"]; ok 
-		{
+		if v, ok := claims["user_id"]; ok {
 			uid = v
-		}
-	 	else if v, ok := claims["sub"]; ok 
-		{
+		} else if v, ok := claims["sub"]; ok {
 			uid = v
-		}
-		else 
-		{
+		} else {
 			http.Error(w, "missing user id claim", http.StatusUnauthorized)
 			return
 		}
 
 
 		userID, _ := uid.(string)
-		if userID == "" 
-		{
+		if userID == "" {
 			http.Error(w, "invalid user id claim", http.StatusUnauthorized)
 			return
 		}	
-		//UserIDKey user_id in mongo gets the userID from DB
 		ctx := context.WithValue(r.Context(), userIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})		
+
 }
+

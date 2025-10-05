@@ -18,6 +18,7 @@ type Config struct {
 	DatabaseName string
 	BaseURL      string
 	Port         string
+	Secret       string
 }
 
 // New sets up all config related services
