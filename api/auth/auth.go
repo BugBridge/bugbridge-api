@@ -19,6 +19,8 @@ type UserInfo struct {
 
 type UserRepo interface {
 	GetByEmail(ctx context.Context, email string) (*UserInfo, error)
+
+	CreateUser(ctx context.Context, email, passHash string) (*UserInfo, error)
 }
 
 type AuthHandler struct {
@@ -56,7 +58,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Check password
+	//Check password with bcrypt
 	if bcrypt.CompareHashAndPassword([]byte(user.Pass), []byte(req.Password)) != nil {
 		writeError(w, http.StatusUnauthorized, "invalid credentials")
 		return
