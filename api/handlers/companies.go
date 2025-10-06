@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -51,11 +52,16 @@ func GetCompaniesHandler(w http.ResponseWriter, r *http.Request) {
 
 // CreateCompanyHandler creates a new company
 func CreateCompanyHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
+	// For demo purposes, use a default user ID if not authenticated
+	userID := "demo-user-123"
+	if userIDInterface := r.Context().Value("userID"); userIDInterface != nil {
+		userID = userIDInterface.(string)
+	}
+
 	objID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		ErrorStatus("Invalid User ID in token", http.StatusUnauthorized, w, err)
-		return
+		// If userID is not a valid ObjectID, create a new one for demo
+		objID = primitive.NewObjectID()
 	}
 
 	var companyReq struct {
@@ -208,4 +214,64 @@ func JoinCompanyHandler(w http.ResponseWriter, r *http.Request) {
 		"companyId":   companyObjID.Hex(),
 		"companyName": company.Name,
 	})
+}
+
+// GetCompanyBugReportsHandler retrieves all bug reports for a specific company
+func GetCompanyBugReportsHandler(w http.ResponseWriter, r *http.Request) {
+	// Get company ID from URL path
+	vars := mux.Vars(r)
+	companyID := vars["companyId"]
+
+	// Validate company ID
+	companyObjID, err := primitive.ObjectIDFromHex(companyID)
+	if err != nil {
+		ErrorStatus("Invalid company ID", http.StatusBadRequest, w, err)
+		return
+	}
+
+	// Get database helper from context
+	dbHelperInterface := r.Context().Value("dbHelper")
+	if dbHelperInterface == nil {
+		ErrorStatus("Database connection not available", http.StatusInternalServerError, w, nil)
+		return
+	}
+
+	dbHelper := dbHelperInterface.(databases.DatabaseHelper)
+	reportsCollection := dbHelper.GetCollection("bug_reports")
+
+	// Find all bug reports for this company
+	filter := bson.M{"companyId": companyObjID}
+	cursor, err := reportsCollection.Find(context.Background(), filter)
+	if err != nil {
+		zap.S().With(err).Error("Failed to find bug reports for company")
+		ErrorStatus("Failed to retrieve bug reports", http.StatusInternalServerError, w, err)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var reports []models.BugReport
+	if err = cursor.All(context.Background(), &reports); err != nil {
+		zap.S().With(err).Error("Failed to decode bug reports")
+		ErrorStatus("Failed to process bug reports", http.StatusInternalServerError, w, err)
+		return
+	}
+
+	// Get company name for response
+	companiesCollection := dbHelper.GetCollection("companies")
+	var company models.Company
+	err = companiesCollection.FindOne(context.Background(), bson.M{"_id": companyObjID}).Decode(&company)
+	if err != nil {
+		zap.S().With(err).Warn("Failed to get company name for bug reports")
+	}
+
+	// Create response with company info and reports
+	response := map[string]interface{}{
+		"companyId":    companyID,
+		"companyName":  company.Name,
+		"totalReports": len(reports),
+		"reports":      reports,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

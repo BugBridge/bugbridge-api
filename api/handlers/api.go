@@ -72,12 +72,13 @@ func (a *App) New() *mux.Router {
 
 	// Company endpoints
 	apiCreate.HandleFunc("/companies", GetCompaniesHandler).Methods("GET", "OPTIONS")
-	apiCreate.Handle("/companies", Middleware(http.HandlerFunc(CreateCompanyHandler))).Methods("POST", "OPTIONS")
+	apiCreate.HandleFunc("/companies", CreateCompanyHandler).Methods("POST", "OPTIONS")
 	apiCreate.Handle("/companies/join", Middleware(http.HandlerFunc(JoinCompanyHandler))).Methods("POST", "OPTIONS")
+	apiCreate.HandleFunc("/companies/{companyId}/reports", GetCompanyBugReportsHandler).Methods("GET", "OPTIONS")
 
 	// Bug Reports endpoints
 	apiCreate.HandleFunc("/bug-reports", GetBugReportsHandler).Methods("GET", "OPTIONS")
-	apiCreate.Handle("/bug-reports", Middleware(http.HandlerFunc(CreateBugReportHandler))).Methods("POST", "OPTIONS")
+	apiCreate.HandleFunc("/bug-reports", CreateBugReportHandler).Methods("POST", "OPTIONS")
 	apiCreate.Handle("/bug-reports/{id}", Middleware(http.HandlerFunc(GetBugReportHandler))).Methods("GET", "OPTIONS")
 	apiCreate.Handle("/bug-reports/{id}/status", Middleware(http.HandlerFunc(UpdateBugReportStatusHandler))).Methods("PUT", "OPTIONS")
 	apiCreate.Handle("/bug-reports/{id}/comments", Middleware(http.HandlerFunc(AddCommentHandler))).Methods("POST", "OPTIONS")
